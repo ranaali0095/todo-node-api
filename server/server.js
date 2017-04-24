@@ -13,13 +13,21 @@ app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
   let todo = new Todo({
-    text: req.body.text
+    text: req.body.text,
   });
 
   todo.save().then((doc) => {
-      res.send(doc);
+    res.send(doc);
   }).catch((err) => {
-      res.status(400).send(err);
+    res.status(400).send(err);
+  });
+});
+
+app.get('/todos', (req, res) => {
+  Todo.find().then((todos) => {
+    res.send({todos});
+  }).catch((err) => {
+    console.log('Unable to fetch todos', err);
   });
 });
 
