@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "test": "mocha server/**/*test.js",
+    "test-watch": "nodemon --exec 'npm test'"
+  },
   "dependencies": {
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
