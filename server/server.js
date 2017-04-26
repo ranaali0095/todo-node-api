@@ -11,6 +11,7 @@ const _ = require('lodash')
 let {mongoose} = require('./db/mongoose')
 let {Todo} = require('./models/todo')
 let {User} = require('./models/users')
+let {authenticate} = require('./middlewares/authenticate')
 
 let app = express()
 let port = process.env.PORT || 3000
@@ -114,11 +115,17 @@ app.post('/users', (req, res) => {
   user.save().then(() => {
     return user.generateAuthToken()  //call an  instance method
   }).then((token) => {
-    console.log(token);
+    console.log(token)
     res.header('x-auth', token).send(user)
   }).catch((err) => {
     res.status(400).send(err)
   })
+})
+
+
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user)
 })
 
 //start server
