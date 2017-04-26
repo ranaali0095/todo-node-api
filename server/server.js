@@ -1,80 +1,81 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const {ObjectID} = require('mongodb');
+const express = require('express')
+const bodyParser = require('body-parser')
+const {ObjectID} = require('mongodb')
 
-let {mongoose} = require('./db/mongoose');
-let {Todo} = require('./models/todo');
-let {User} = require('./models/users');
+let {mongoose} = require('./db/mongoose')
+let {Todo} = require('./models/todo')
+let {User} = require('./models/users')
 
-let app = express();
-let port = process.env.PORT || 3000;
+let app = express()
+let port = process.env.PORT || 3000
 
-app.use(bodyParser.json());
+app.use(bodyParser.json())
 
 //routes
 
 app.post('/todos', (req, res) => {
-    let todo = new Todo({
-        text: req.body.text,
-    });
+  let todo = new Todo({
+    text: req.body.text,
+  })
 
-    todo.save().then((doc) => {
-        res.send(doc);
-    }).catch((err) => {
-        res.status(400).send(err);
-    });
-});
+  todo.save().then((doc) => {
+    res.send(doc)
+  }).catch((err) => {
+    res.status(400).send(err)
+  })
+})
 
 app.get('/todos', (req, res) => {
-    Todo.find().then((todos) => {
-        res.send({todos});
-    }).catch((err) => {
-        console.log('Unable to fetch todos', err);
-    });
-});
+  Todo.find().then((todos) => {
+    res.send({todos})
+  }).catch((err) => {
+    console.log('Unable to fetch todos', err)
+  })
+})
 
 app.get('/todos/:id', (req, res) => {
-    let id = req.params.id;
+  let id = req.params.id
 
-    if (!ObjectID.isValid(id)) {
-        return res.status(404).send();
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send()
+  }
+
+  Todo.findById(id).then((todo) => {
+
+    if (!todo) {
+      return res.status(404).send('unable to find todo with this id')
     }
+    res.send({todo})
 
-    Todo.findById(id).then((todo) => {
-
-        if (!todo) {
-            return res.status(404).send('unable to find todo with this id');
-        }
-        res.send({todo});
-
-    }).catch((err) => {
-        res.status(400).send(err);
-    });
-});
+  }).catch((err) => {
+    res.status(400).send(err)
+  })
+})
 
 app.delete('/todos/:id', (req, res) => {
-    let id = req.params.id;
+  let id = req.params.id
 
-    if (!ObjectID.isValid(id)) {
-        return res.status(404).send();
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send()
+  }
+
+  Todo.findByIdAndRemove(id).then((doc) => {
+
+    if (!doc) {
+      return res.status(404).send()
     }
+    return res.send({doc})
 
-    Todo.findByIdAndRemove(id).then((doc) => {
+  }).catch((err) => {
+    res.status(400).send()
 
-        if (!doc) {
-            return res.status(404).send();
-        }
-        return res.send('Todo was removed successfully');
+  })
 
-    }).catch((err) => {
-        res.status(400).send();
-    });
-
-});
+})
 
 //start server
 app.listen(port, () => {
-    console.log('Started on port ', port);
-});
+  console.log('Started on port ', port)
+})
 
-module.exports = {app};
+module.exports = {app}
