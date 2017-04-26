@@ -1,8 +1,13 @@
+//load environment
+require('./config/config')
+
+//load npm modules
 const express = require('express')
 const bodyParser = require('body-parser')
 const {ObjectID} = require('mongodb')
 const _ = require('lodash')
 
+//load custom modules
 let {mongoose} = require('./db/mongoose')
 let {Todo} = require('./models/todo')
 let {User} = require('./models/users')
