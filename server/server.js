@@ -20,9 +20,10 @@ app.use(bodyParser.json())
 
 //routes
 
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
   let todo = new Todo({
     text: req.body.text,
+    _creator: req.user._id,
   })
 
   todo.save().then((doc) => {
@@ -32,15 +33,17 @@ app.post('/todos', (req, res) => {
   })
 })
 
-app.get('/todos', (req, res) => {
-  Todo.find().then((todos) => {
+app.get('/todos', authenticate, (req, res) => {
+  Todo.find({
+    _creator: req.user._id, // gate was added
+  }).then((todos) => {
     res.send({todos})
   }).catch((err) => {
     console.log('Unable to fetch todos', err)
   })
 })
 
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
   let id = req.params.id
 
   if (!ObjectID.isValid(id)) {
@@ -125,17 +128,30 @@ app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user)
 })
 
-//start server
-app.listen(port, () => {
-  console.log('Started on port ', port)
+app.post('/users/login', (req, res) => {
+
+  let body = _.pick(req.body, ['email', 'password'])
+
+  User.findByCredentials(body.email, body.password).then((user) => {
+    user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user)
+    })
+  }).catch((err) => {
+    res.status(400).send()
+  })
 })
 
 app.delete('/users/me/token', authenticate, (req, res) => {
-  req.user.removeToken(req.token).then(() => {
-    res.status(200).send()
-  }).catch(() => {
+  req.user.removeToken(req.token).then((user) => {
+    res.status(200).send(user)
+  }).catch((e) => {
     res.status(400).send()
   })
+})
+
+//start server
+app.listen(port, () => {
+  console.log('Started on port ', port)
 })
 
 module.exports = {app}
