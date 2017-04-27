@@ -46,12 +46,24 @@ UserSchema.methods.toJSON = function () {
 UserSchema.methods.generateAuthToken = function () {
   let user = this
   let access = 'auth'
-  let token = jwt.sign({_id: user._id.toHexString(), access}, 'somerandomtext')
+  let token = jwt.sign({_id: user._id.toHexString(), access},
+    'somerandomstring')
 
   user.tokens.push({access, token})
 
   return user.save().then(() => {
     return token
+  })
+}
+
+UserSchema.methods.removeToken = function (token) {
+  let user = this
+
+  return user.update({
+    $pull: {
+      tokens: {token},
+
+    },
   })
 }
 
@@ -84,8 +96,6 @@ UserSchema.pre('save', function (next) {
         next()
       })
     })
-
-
 
   } else {
     next()
