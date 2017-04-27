@@ -61,7 +61,7 @@ UserSchema.statics.findByToken = function (token) {
   let decoded
 
   try {
-    decoded = jwt.verify(token, 'somerandomtext')
+    decoded = jwt.verify(token, 'somerandomstring')
   } catch (e) {
     return Promise.reject()
   }
